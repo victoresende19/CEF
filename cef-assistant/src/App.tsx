@@ -186,7 +186,7 @@ const App: React.FC = () => {
               )}
             </div>
             <div className="w-full pt-16 pb-6 text-sm text-center md:text-left fade-in">
-              <a className="text-gray-500 no-underline hover:no-underline" href="#">&copy; 2023 </a>
+              <a className="text-gray-500 no-underline hover:no-underline" href="#">&copy; 2024 </a>
               - Victor Augusto Souza Resende
             </div>
           </div>
