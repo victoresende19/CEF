@@ -218,6 +218,7 @@ const App: React.FC = () => {
                   ) : (
                     chatHistory.map((message, index) => (
                       <React.Fragment key={index}>
+                        <br></br>
                         <div className="chat-bubble human self-end">
                           <p className="text-black">{message.human}</p>
                         </div>
