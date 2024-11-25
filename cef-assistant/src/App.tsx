@@ -123,6 +123,7 @@ const App: React.FC = () => {
           .chat-bubble.ia {
             background-color: #fff;
             align-self: flex-start;
+            max-width: 90%;
           }
           .chat-container {
             display: flex;
@@ -194,7 +195,7 @@ const App: React.FC = () => {
             {/* Chat abaixo das informações */}
             <div className="w-full md:w-3/4 lg:w-2/3 flex flex-col items-center p-1">
               <div
-                className="w-full bg-gray-900 opacity-75 shadow-lg rounded-lg px-5 pt-20 pb-8 mb-1"
+                className="w-full bg-gray-900 opacity-75 shadow-lg rounded-lg px-5 pt-5 pb-8 mb-1"
                 style={{
                   height: '500px', // Diminuímos a altura total do chat
                   display: 'flex',
@@ -220,6 +221,7 @@ const App: React.FC = () => {
                         <div className="chat-bubble human self-end">
                           <p className="text-black">{message.human}</p>
                         </div>
+                        <br></br>
                         <div className="chat-bubble ia">
                           {message.loading ? (
                             <Box
