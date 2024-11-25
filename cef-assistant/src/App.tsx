@@ -119,15 +119,33 @@ const App: React.FC = () => {
           .chat-bubble.human {
             background-color: #dcf8c6;
             align-self: flex-end;
+            margin-bottom: 20px;
+            margin-right: 10px;
           }
           .chat-bubble.ia {
             background-color: #fff;
             align-self: flex-start;
             max-width: 90%;
+            margin-bottom: 20px;
           }
           .chat-container {
             display: flex;
             flex-direction: column;
+            scroll-behavior: smooth;
+          }
+          .chat-container::-webkit-scrollbar {
+            width: 8px;
+          }
+          .chat-container::-webkit-scrollbar-track {
+            background: #2d3748; /* Cor do track */
+            border-radius: 10px;
+          }
+          .chat-container::-webkit-scrollbar-thumb {
+            background: #718096; /* Cor do thumb */
+            border-radius: 10px;
+          }
+          .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #4a5568; /* Cor do thumb ao passar o mouse */
           }
           `}
         </style>
@@ -197,7 +215,7 @@ const App: React.FC = () => {
               <div
                 className="w-full bg-gray-900 opacity-75 shadow-lg rounded-lg px-5 pt-5 pb-8 mb-1"
                 style={{
-                  height: '500px', // Diminuímos a altura total do chat
+                  height: '500px',
                   display: 'flex',
                   flexDirection: 'column',
                 }}
@@ -205,8 +223,8 @@ const App: React.FC = () => {
                 <div
                   className="chat-container flex-1 mb-4"
                   style={{
-                    minHeight: '300px', // Diminuímos a altura mínima da área de mensagens
-                    maxHeight: '400px', // Diminuímos a altura máxima da área de mensagens
+                    minHeight: '300px',
+                    maxHeight: '400px',
                     overflowY: 'auto',
                   }}
                   ref={chatContainerRef}
@@ -218,11 +236,9 @@ const App: React.FC = () => {
                   ) : (
                     chatHistory.map((message, index) => (
                       <React.Fragment key={index}>
-                        <br></br>
                         <div className="chat-bubble human self-end">
                           <p className="text-black">{message.human}</p>
                         </div>
-                        <br></br>
                         <div className="chat-bubble ia">
                           {message.loading ? (
                             <Box
