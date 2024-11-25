@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { BsLinkedin, BsGithub } from 'react-icons/bs';
 import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
@@ -8,27 +8,61 @@ import './App.css';
 
 const App: React.FC = () => {
   const [question, setQuestion] = useState('');
-  const [response, setResponse] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<
+    { human: string; ia: string; loading?: boolean }[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(20);
   const [error, setError] = useState<string | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(event.target.value);
   };
 
   const handleSubmit = async () => {
+    if (question.trim() === '') return;
+
+    // Adiciona a pergunta ao chat imediatamente com uma resposta vazia e indicador de loading
+    const newChatEntry = { human: question, ia: '', loading: true };
+    setChatHistory([...chatHistory, newChatEntry]);
+    setQuestion('');
     setLoading(true);
-    setResponse(null);
-    setCountdown(20);
-    setError(null); // Reset error state
+    setError(null);
+
     try {
-      const res = await axios.post('https://caixa-431702.rj.r.appspot.com/ask_question', { question });
-      setResponse(res.data.answer);
+      const res = await axios.post(
+        'http://localhost:8000/ask_question',
+        { question }
+      );
+
+      const { answer } = res.data;
+      console.log(answer)
+
+      // Atualiza a última entrada do chat com a resposta da IA
+      setChatHistory((prevChatHistory) => {
+        const updatedChatHistory = [...prevChatHistory];
+        updatedChatHistory[updatedChatHistory.length - 1] = {
+          human: newChatEntry.human,
+          ia: answer,
+          loading: false,
+        };
+        return updatedChatHistory;
+      });
     } catch (error) {
       setError('Erro ao obter resposta. Tente novamente.');
+      // Atualiza o chat com a mensagem de erro
+      setChatHistory((prevChatHistory) => {
+        const updatedChatHistory = [...prevChatHistory];
+        updatedChatHistory[updatedChatHistory.length - 1] = {
+          human: newChatEntry.human,
+          ia: 'Erro ao obter resposta. Tente novamente.',
+          loading: false,
+        };
+        return updatedChatHistory;
+      });
     } finally {
-      setLoading(false); // Ensure loading is set to false
+      setLoading(false);
     }
   };
 
@@ -37,7 +71,7 @@ const App: React.FC = () => {
     if (loading && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
-      }, 1000); // Alterado para 1000 milissegundos
+      }, 1000);
     } else if (countdown === 0) {
       setLoading(false);
     }
@@ -45,8 +79,16 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [loading, countdown]);
 
+  useEffect(() => {
+    // Rolagem automática para a última mensagem
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory, loading]);
+
   return (
-    <html lang="en">
+    <html lang="pt">
       <head>
         <link
           rel="stylesheet"
@@ -65,12 +107,34 @@ const App: React.FC = () => {
               sans-serif, "Apple Color Emoji",
               "Segoe UI Emoji", "Segoe UI Symbol",
               "Noto Color Emoji";
-          }`}
+          }
+          .chat-bubble {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 20px;
+            margin-bottom: 1px;
+            word-wrap: break-word;
+            position: relative;
+          }
+          .chat-bubble.human {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+          }
+          .chat-bubble.ia {
+            background-color: #fff;
+            align-self: flex-start;
+          }
+          .chat-container {
+            display: flex;
+            flex-direction: column;
+          }
+          `}
         </style>
       </head>
 
       <body className="leading-normal tracking-normal text-gray-100 m-6 bg-cover bg-fixed">
         <div className="h-full">
+          {/* Cabeçalho */}
           <div className="w-full container mx-auto">
             <div className="w-full flex items-center justify-between">
               <a
@@ -106,89 +170,111 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="container pt-24 md:pt-36 mx-auto flex flex-wrap flex-col md:flex-row items-center">
-            <div className="flex flex-col w-full xl:w-2/5 justify-center lg:items-start">
-              <p className="leading-normal text-base md:text-2xl mb-8 text-justify md:text-left text-white">
-                O assistente CEF tem como objetivo responder a perguntas específicas sobre o código de ética e conduta para funcionários e servidores da Caixa Econômica Federal, com base no documento disponível no site <a className="inline-block text-blue-300 no-underline hover:text-pink-500 hover:text-underline text-right transform hover:scale-100 duration-300 ease-in-out" href="https://www.caixa.gov.br/Downloads/caixa-asset/Codigo-de-Etica-e-de-Conduta.pdf" target="_blank">Caixa Asset</a>.
+          {/* Conteúdo principal */}
+          <div className="container pt-10 md:pt-15 mx-auto flex flex-col items-center">
+            {/* Informações do site */}
+            <div className="w-full md:w-3/4 lg:w-2/3 flex flex-col items-start p-6">
+              <p className="leading-normal text-base md:text-2xl mb-2 text-justify text-white">
+                O assistente CEF tem como objetivo responder a perguntas
+                específicas sobre o código de ética e conduta para funcionários
+                e servidores da Caixa Econômica Federal, com base no documento
+                disponível no site{' '}
+                <a
+                  className="inline-block text-blue-300 no-underline hover:text-pink-500 hover:text-underline transform hover:scale-100 duration-300 ease-in-out"
+                  href="https://www.caixa.gov.br/Downloads/caixa-asset/Codigo-de-Etica-e-de-Conduta.pdf"
+                  target="_blank"
+                >
+                  Caixa Asset
+                </a>
+                . Pergunte e tire suas dúvidas!
               </p>
-              <form className="bg-gray-900 opacity-75 w-full shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-                <div className="mb-4">
-                  <label className="block text-yellow-600 py-2 font-bold mb-2" htmlFor="movieInput">
-                    Pergunte algo relacionado à ética e conduta da Caixa!
-                  </label>
-                  <div className="relative">
-                    <TextField
-                      id="outlined-multiline-flexible"
-                      value={question}
-                      onChange={handleInputChange}
-                      multiline
-                      rows={3}
-                      placeholder="Faça uma pergunta..."
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-black bg-white leading-tight focus:outline-none focus:shadow-outline"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center pt-4">
-                  {loading ? (
-                    <>
-                      <div className="text-white">Isso pode levar cerca de {countdown} segundos...</div>
-                    </>
-                  ) : (
-                    <button
-                      className="bg-gradient-to-r from-yellow-500 to-yellow-900 text-slate-50 font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={loading}
-                    >
-                      Perguntar
-                    </button>
-                  )}
-                </div>
-              </form>
             </div>
 
-            <div className="w-full xl:w-3/5 p-12 overflow-hidden relative flex justify-center items-center">
-              {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-                  <CircularProgress color="inherit" />
-                </Box>
-              ) : (
-                <>
-                  {error ? (
-                    <div className="bg-gray-900 opacity-75 w-full text-center shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-                      <span className="bg-clip-text bg-gradient-to-r from-white to-orange-500">
-                        {error}
-                      </span>
+            {/* Chat abaixo das informações */}
+            {/* Chat abaixo das informações */}
+            <div className="w-full md:w-3/4 lg:w-2/3 flex flex-col items-center p-1">
+              <div
+                className="w-full bg-gray-900 opacity-75 shadow-lg rounded-lg px-5 pt-20 pb-8 mb-1"
+                style={{
+                  height: '500px', // Diminuímos a altura total do chat
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <div
+                  className="chat-container flex-1 mb-4"
+                  style={{
+                    minHeight: '300px', // Diminuímos a altura mínima da área de mensagens
+                    maxHeight: '400px', // Diminuímos a altura máxima da área de mensagens
+                    overflowY: 'auto',
+                  }}
+                  ref={chatContainerRef}
+                >
+                  {chatHistory.length === 0 ? (
+                    <div className="text-center text-gray-400 mt-10 text-xl">
+                      Nenhuma interação ainda. Faça uma pergunta sobre o código de ética da Caixa!
                     </div>
                   ) : (
-                    <>
-                      {response ? (
-                        <div className="bg-gray-900 opacity-75 w-full text-center shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-                          <p className="my-4 text-3xl md:text-5xl text-white font-bold leading-tight">
-                            <span className="bg-clip-text bg-gradient-to-r from-white to-orange-500">
-                              Resposta
-                            </span>
-                          </p>
-                          <p className="text-white text-xl text-left">
-                            {response}
-                          </p>
+                    chatHistory.map((message, index) => (
+                      <React.Fragment key={index}>
+                        <div className="chat-bubble human self-end">
+                          <p className="text-black">{message.human}</p>
                         </div>
-                      ) : (
-                        <div className="bg-gray-900 opacity-75 w-full text-center shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-                          <span className="bg-clip-text text-transparent font-bold  bg-gradient-to-r from-yellow-600 to-yellow-700 text-3xl">
-                            Sua resposta aparecerá aqui
-                          </span>
+                        <div className="chat-bubble ia">
+                          {message.loading ? (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                minHeight: '20px',
+                              }}
+                            >
+                              <CircularProgress size={20} />
+                            </Box>
+                          ) : (
+                            <p className="text-black">{message.ia}</p>
+                          )}
                         </div>
-                      )}
-                    </>
+                      </React.Fragment>
+                    ))
                   )}
-                </>
-              )}
+                </div>
+                <form
+                  className="flex"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit();
+                  }}
+                >
+                  <TextField
+                    id="outlined-multiline-flexible"
+                    value={question}
+                    onChange={handleInputChange}
+                    multiline
+                    rows={2}
+                    placeholder="Digite sua pergunta..."
+                    className="flex-grow shadow appearance-none border rounded w-full py-2 px-3 text-black bg-white leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                  <button
+                    className="ml-2 bg-gradient-to-r from-yellow-500 to-yellow-900 text-slate-50 font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    Enviar
+                  </button>
+                </form>
+                {error && <div className="text-red-500 mt-2">{error}</div>}
+              </div>
             </div>
-            <div className="w-full pt-16 pb-6 text-sm text-center md:text-left fade-in">
-              <a className="text-gray-500 no-underline hover:no-underline" href="#">&copy; 2024 </a>
-              - Victor Augusto Souza Resende
-            </div>
+          </div>
+
+          {/* Rodapé */}
+          <div className="w-full pt-1 pb-6 text-sm text-center fade-in">
+            <a className="text-gray-500 no-underline hover:no-underline" href="#">
+              &copy; 2024{' '}
+            </a>
+            - Victor Augusto Souza Resende
           </div>
         </div>
       </body>
