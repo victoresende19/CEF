@@ -32,7 +32,7 @@ const App: React.FC = () => {
 
     try {
       const res = await axios.post(
-        'http://localhost:8000/ask_question',
+        'https://caixa-431702.rj.r.appspot.com/ask_question',
         { question }
       );
 
