@@ -1,6 +1,6 @@
 # Assistente CEF
 
-Sua plataforma definitiva para tirar dúvidas sobre o código de Ética e conduta da Caixa Asset!
+Sua plataforma definitiva para tirar dúvidas sobre o Código de ética e conduta da Caixa Asset!
 
 ## Acesse 
 Para facilitar o teste do Assistente CEF, foi desenvolvido um website que realiza consultas à API criada. A API foi criada através das bibliotecas FastAPI, PyPDF2, FAISS, LangChain e OpenAI, em linguagem Python, e é necessário obter uma API_KEY da OpenAI, a qual você pode criar gratuitamente, basta [clicar aqui](https://openai.com/index/openai-api/). Além disso, visando a acessibilidade, criou-se a plataforma Assistente CEF por meio do framework React, em linguagem JavaScript. 
