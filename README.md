@@ -7,8 +7,7 @@ Para facilitar o teste do Assistente CEF, foi desenvolvido um website que realiz
 
 O deploy da API foi realizado utilizando o [Google Cloud](https://cloud.google.com/?hl=pt-BR), sob o plano gratuito. Devido às limitações deste plano, como o uso de máquinas menos robustas, o tempo de resposta pode ser maior em comparação ao uso local da API. Por fim, o frontend da plataforma teve o deploy através do [Vercel](https://vercel.com/). Para acessar e testar o aplicativo, visite: [https://gravidai.vercel.app/](https://gravidai.vercel.app/).
 
-![image](https://github.com/user-attachments/assets/93feae66-4737-4d62-baef-2f88cc3021ea)
-
+![image](https://github.com/user-attachments/assets/f6988332-82b0-4cef-9738-b2ae12f54027)
 
 
 <hr>
@@ -90,6 +89,12 @@ Ativação da interface:
 ```
 npm start
 ```
+
+## Arquitetura RAG
+![image](https://github.com/user-attachments/assets/9f4ec445-8632-4614-aedb-d3c571283305)
+
+## Arquitetura em camadas
+![image](https://github.com/user-attachments/assets/a78f90aa-d18e-4b8c-bb49-4d2430beb658)
 
 <hr>
 @Victor Resende
